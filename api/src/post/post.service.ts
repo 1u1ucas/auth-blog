@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import connection from "../../config/database.config";
-import { ResultSetHeader } from "mysql2";
 
 const getAll = async (req: Request, res: Response) => {
   connection.query("SELECT * FROM posts", (err, results) => {
@@ -50,12 +49,13 @@ const create = async (req: Request, res: Response) => {
   connection.query(
     "INSERT INTO posts (title, content, user_id, created_at, image_path) VALUES (?, ?, ?, ?, ?)",
     [title, content, user_id, created_at, image_path],
-    (err, results: ResultSetHeader) => {
+    (err, result) => {
       if (err) {
         console.log(err);
-        res.status(500).send("Error saving post to database");
+        res.status(500).send("Error saving post in database");
       } else {
-        res.status(201).send({ id: results.insertId, title, content, user_id, created_at, image_path });
+        const postId = result.rows[0].id;
+        res.send({ id: postId, title, content, user_id, created_at, image_path });
       }
     }
   );

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import connection from "../../config/database.config";
-import { ResultSetHeader } from "mysql2";
 
 const getAll = async (req: Request, res: Response) => {
   connection.query("SELECT * FROM users", (err, results) => {
@@ -34,15 +33,16 @@ const create = async (req: Request, res: Response) => {
   connection.query(
     "INSERT INTO users (username, email, created_at) VALUES (?, ?, ?, ?)",
     [username, email, password, created_at],
-    (err, results: ResultSetHeader) => {
+    (err, result) => {
       if (err) {
         console.log(err);
-        res.status(500).send("Error saving user to database");
+        res.status(500).send("Error saving user in database");
       } else {
-        res.status(201).send({ id: results.insertId, username, email });
-      }
+        const userId = result.rows[0].id;
+        res.send({ id: userId, username, email });
+  
     }
-  );
+  });
 }
 
 const update = async (req: Request, res: Response) => {

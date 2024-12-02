@@ -19,7 +19,7 @@
 
 - id [Int PK]
 - user_id [Int FK] ( Many To One )
-- title [varchar]
+- title [varchar]   
 - content [varchar]
 - created_at [timestamp]
 - image_path [varchar]

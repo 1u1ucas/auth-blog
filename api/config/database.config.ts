@@ -1,11 +1,13 @@
-import mysql, { ResultSetHeader } from "mysql2";
+import { Client } from 'pg';
+
 
 // Connection to the mysql database
-const connection = mysql.createConnection({
+const connection = new Client({
   host: 'localhost',
   user: 'admin',
   password: 'admin',
   database: 'blog_db',
+  port: 5432
 });
 
 connection.connect((err) => {
