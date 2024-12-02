@@ -3,6 +3,7 @@ import LoggerService from "./middleware/logger.middleware";
 import cors from "cors";
 
 import UserController from "./user/user.controller";
+import PostController from "./post/post.controller";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -19,7 +20,9 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello !");
 });
 
-app.use("/users", UserController);
+app.use("/user", UserController);
+app.use("/post", PostController);
+
 
 
 

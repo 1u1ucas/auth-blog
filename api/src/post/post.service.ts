@@ -7,7 +7,7 @@ const getAll = async (req: Request, res: Response) => {
       console.log(err);
       res.status(500).send("Error retrieving posts from database");
     } else {
-      res.send(results);
+      res.send(results.rows);
     }
   });
 };
@@ -22,7 +22,7 @@ const getOneById = async (req: Request, res: Response) => {
         console.log(err);
         res.status(500).send("Error retrieving post from database");
       } else {
-        res.send(results);
+        res.send(results.rows);
       }
     }
   );
@@ -38,7 +38,7 @@ const getByUserId = async (req: Request, res: Response) => {
         console.log(err);
         res.status(500).send("Error retrieving posts from database");
       } else {
-        res.send(results);
+        res.send(results.rows);
       }
     }
   );
