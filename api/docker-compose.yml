@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: blog_db
     volumes:
-      - /var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     ports:
       - 5432:5432
 

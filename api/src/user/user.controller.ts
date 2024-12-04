@@ -6,7 +6,8 @@ const UserController = Router();
 UserController.get("/", UserService.getAll);
 UserController.post("/", UserService.create);
 UserController.get("/:id", UserService.getOneById);
-UserController.get("/:id", UserService.update);
-UserController.get("/:id", UserService.remove);
+UserController.put("/:id", UserService.update);
+UserController.delete("/:id", UserService.remove);
+
 
 export default UserController;
