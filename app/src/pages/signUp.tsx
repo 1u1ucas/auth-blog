@@ -22,6 +22,8 @@ function SignUp() {
       try {
         const data = await createUser(user as UserType);
         alert("Utilisateur créé avec succès");
+        setUser({});
+        console.log("data", user);
       } catch (error) {
         console.error("Erreur lors de la création de l'utilisateur", error);
         alert("Erreur lors de la création de l'utilisateur");
@@ -42,7 +44,7 @@ function SignUp() {
             type="text"
             placeholder="Entrez votre nom d'utilisateur"
             onChange={handleChange}
-            value={user.username}
+            value={user.username || ""}
           />
           <FormInput
             label="Email"
@@ -50,7 +52,7 @@ function SignUp() {
             type="email"
             placeholder="Entrez votre email"
             onChange={handleChange}
-            value={user.email}
+            value={user.email || ""}
           />
           <FormInput
             label="Mot de passe"
@@ -58,7 +60,7 @@ function SignUp() {
             type="password"
             placeholder="Entrez votre mot de passe"
             onChange={handleChange}
-            value={user.password}
+            value={user.password || ""}
           />
           <button
             type="submit"
