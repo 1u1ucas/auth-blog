@@ -1,9 +1,14 @@
 import express, { Request, Response } from "express";
 import LoggerService from "./middleware/logger.middleware";
 import cors from "cors";
+import dotenv from "dotenv";
 
 import UserController from "./user/user.controller";
 import PostController from "./post/post.controller";
+import AuthController from "../auth/auth.controller";
+
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -22,6 +27,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/user", UserController);
 app.use("/post", PostController);
+app.use("/auth", AuthController);
 
 
 
