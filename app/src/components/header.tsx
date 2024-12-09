@@ -33,6 +33,12 @@ function Header() {
           >
             Post
           </Link>
+          <Link
+            to="/createPost"
+            className="text-lg font-medium hover:text-blue-300 transition"
+          >
+            Créer un post
+          </Link>
           {isLoggedIn ? (
             <>
               <Link
