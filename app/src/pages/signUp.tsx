@@ -17,7 +17,7 @@ function SignUp() {
     try {
       const data = await signup(user as UserType);
       console.log(data);
-      setUser({}); // Réinitialiser les champs du formulaire
+      setUser({});
       setMessage("Utilisateur créé avec succès !");
     } catch (error) {
       console.error("Erreur lors de l'inscription de l'utilisateur", error);
@@ -32,7 +32,7 @@ function SignUp() {
           Inscription
         </h2>
         {message && (
-          <div className="mb-4 text-center text-green-500">{message}</div>
+          <div className="mb-4 text-center text-black-500">{message}</div>
         )}
         <form>
           <FormInput

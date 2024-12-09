@@ -62,8 +62,8 @@ const create = async (userDTO: IPostDTO) => {
 };
 
 const update = async (id: number, userDTO: IPostDTO) => {
-  const query = "UPDATE public.post SET user_id = $1, title = $2, content = $3, image_path = $4 WHERE id = $5";
-  const values = [userDTO.user_id, userDTO.title, userDTO.content, userDTO.image_path, id];
+  const query = "UPDATE public.post title = $1, content = $2, image_path = $3 WHERE id = $4, user_id = $5";
+  const values = [userDTO.title, userDTO.content, userDTO.image_path, id, userDTO.user_id];
 
   try {
     await pool.query(query, values);
@@ -76,7 +76,7 @@ const update = async (id: number, userDTO: IPostDTO) => {
 }
 
 const remove = async (id: number) => {
-  const query = "DELETE FROM public.post WHERE id = $1";
+  const query = "DELETE FROM public.post WHERE id = $1 ";
   const values = [id];
 
   try {
@@ -89,6 +89,20 @@ const remove = async (id: number) => {
   }
 } 
 
+const getCreatorById = async (id: number): Promise<string | null> => {
+  const query = "SELECT user_id FROM public.post WHERE id = $1";
+  const values = [id];
+
+  try {
+    const result = await pool.query(query, values);
+    return result.rows[0]?.user_id || null;
+  } catch (error) {
+    console.error("Error fetching post creator:", error);
+    return null;
+  }
+};
+
+
 export default {
   getAll,
   getOneById,
@@ -96,4 +110,5 @@ export default {
   update,
   remove,
   getByUserId,
+  getCreatorById
 };

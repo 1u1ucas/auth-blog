@@ -3,48 +3,68 @@ import PostService from "./post.service";
 
 const PostController = Router();
 
-PostController.get("/", PostService.getAll);
+PostController.get("/", async (req: Request, res: Response): Promise<void> => {
+  const posts = await PostService.getAll(req, res);
+  res.send(posts);
+});
 
-PostController.post("/", async (req: Request, res: Response) => {
+PostController.post("/", async (req: Request, res: Response): Promise<void> => {
   const { user_id, title, content, image_path } = req.body;
-    const postDTO = { user_id, title, content, image_path };
-    const post = await PostService.create(postDTO);
+  const postDTO = { user_id, title, content, image_path };
+  const post = await PostService.create(postDTO);
 
   res.status(201).send(post);
 });
 
-PostController.get("/:id", async (req: Request, res: Response) => {
+PostController.get("/:id", async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const post = await PostService.getOneById(+id);
   if (!post) {
-    res.status(404).send("User not found");
+    res.status(404).send("Post not found");
+    return;
   }
-
   res.send(post);
 });
 
-PostController.put("/:id", async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { user_id, title, content, image_path } = req.body;
-    const postDTO = { user_id, title, content, image_path };
-    const post = await PostService.update(+id, postDTO);
+PostController.put("/:id", async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { user_id, title, content, image_path } = req.body;
 
-    if (!post) {
-        res.status(404).send("User not found");
-    }
+  // Vérifiez que l'utilisateur connecté est l'auteur
+  const postCreator = await PostService.getCreatorById(+id);
+  if (!postCreator || postCreator !== req.user?.id.toString()) {
+    res.status(403).send("Unauthorized to update this post");
+    return;
+  }
 
-    res.send(post);
-   
-    });
+  const postDTO = { user_id, title, content, image_path };
+  const updated = await PostService.update(+id, postDTO);
 
-PostController.delete("/:id", async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const post = await PostService.remove(+id);
+  if (!updated) {
+    res.status(404).send("Post not found");
+    return;
+  }
 
-    if (!post) {
-        res.status(404).send("User not found");
-    } 
-    res.send(post);
-});  
+  res.send("Post updated successfully");
+});
+
+PostController.delete("/:id", async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  
+  const postCreator = await PostService.getCreatorById(+id);
+  if (!postCreator || postCreator !== req.user?.id.toString()) {
+    res.status(403).send("Unauthorized to delete this post");
+    return;
+  }
+
+  const deleted = await PostService.remove(+id);
+
+  if (!deleted) {
+    res.status(404).send("Post not found");
+    return;
+  }
+
+  res.send("Post deleted successfully");
+});
 
 export default PostController;
