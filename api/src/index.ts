@@ -1,37 +1,41 @@
-import express, { Request, Response } from "express";
-import LoggerService from "./middleware/logger.middleware";
-import cors from "cors";
-import dotenv from "dotenv";
-
+import express from "express";
 import UserController from "./user/user.controller";
+import logger from "./middleware/logger.middleware";
+import AuthController from "./auth/auth.controller";
 import PostController from "./post/post.controller";
-import AuthController from "../auth/auth.controller";
-
-
-dotenv.config();
+import authMiddleware from "./middleware/auth.middleware";
+import cors from "cors";
+import { IUser } from "./user/user.types";
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = 8000;
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser;
+    }
+  }
+}
 
 app.use(express.json());
-app.use(    
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
-app.use(LoggerService);
+app.use(cors());
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello !");
+app.use(logger);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-app.use("/user", UserController);
-app.use("/post", PostController);
 app.use("/auth", AuthController);
+app.use("/users", authMiddleware, UserController);
 
+app.use("/posts", authMiddleware, PostController);
 
-
-
+app.get("/private", authMiddleware, (req, res) => {
+  console.log("Get user with authMiddleware: ", req.user);
+  res.send("Private route");
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

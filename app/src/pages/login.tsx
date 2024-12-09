@@ -1,25 +1,27 @@
 import { useState } from "react";
 
-import FormInput from "../components/FormInput";
+import FormInput from "../components/formInput";
 import { UserType } from "../types/user.type";
-import { createUser } from "../service/user.service";
+import { signin } from "../service/auth.service";
 
 function Login() {
   const [user, setUser] = useState<Partial<UserType>>({});
+  const [message, setMessage] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const onSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!user.email || !user.password) {
-      alert("Veuillez remplir tous les champs");
-      return;
-    } else {
-      createUser(user as UserType).then((data) => {
-        alert("Utilisateur créé avec succès");
-      });
+    try {
+      const data = await signin(user as UserType);
+      console.log(data);
+      setUser({}); // Réinitialiser les champs du formulaire
+      setMessage("Connexion réussie !");
+    } catch (error) {
+      console.error("Erreur lors de la connexion de l'utilisateur", error);
+      setMessage("Erreur lors de la connexion.");
     }
   };
 
@@ -29,6 +31,13 @@ function Login() {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Connexion
         </h2>
+        {message && (
+          <div
+            className={`mb-4 text-center ${message.includes("réussie") ? "text-green-500" : "text-red-500"}`}
+          >
+            {message}
+          </div>
+        )}
         <form>
           <FormInput
             label="Email"
@@ -36,6 +45,7 @@ function Login() {
             type="email"
             placeholder="Entrez votre email"
             onChange={handleChange}
+            value={user.email || ""}
           />
           <FormInput
             label="Mot de passe"
@@ -43,6 +53,7 @@ function Login() {
             type="password"
             placeholder="Entrez votre mot de passe"
             onChange={handleChange}
+            value={user.password || ""}
           />
           <button
             type="submit"

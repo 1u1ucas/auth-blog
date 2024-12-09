@@ -1,11 +1,12 @@
 import { useState } from "react";
 
-import FormInput from "../components/FormInput";
+import FormInput from "../components/formInput";
 import { UserType } from "../types/user.type";
-import { createUser } from "../service/user.service";
+import { signup } from "../service/auth.service";
 
 function SignUp() {
   const [user, setUser] = useState<Partial<UserType>>({});
+  const [message, setMessage] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -13,21 +14,14 @@ function SignUp() {
 
   const onSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
-    if (!user.email || !user.password) {
-      alert("Veuillez remplir tous les champs");
-      return;
-    } else {
-      console.log(user);
-      try {
-        const data = await createUser(user as UserType);
-        alert("Utilisateur créé avec succès");
-        setUser({});
-        console.log("data", user);
-      } catch (error) {
-        console.error("Erreur lors de la création de l'utilisateur", error);
-        alert("Erreur lors de la création de l'utilisateur");
-      }
+    try {
+      const data = await signup(user as UserType);
+      console.log(data);
+      setUser({}); // Réinitialiser les champs du formulaire
+      setMessage("Utilisateur créé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de l'inscription de l'utilisateur", error);
+      setMessage("Erreur lors de la création de l'utilisateur.");
     }
   };
 
@@ -37,6 +31,9 @@ function SignUp() {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Inscription
         </h2>
+        {message && (
+          <div className="mb-4 text-center text-green-500">{message}</div>
+        )}
         <form>
           <FormInput
             label="Nom d'utilisateur"
