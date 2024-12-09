@@ -1,33 +1,49 @@
 import { PostType } from "../types/post.type";
 
+const API_URL = "http://localhost:8000";
 
-const API_URL = 'http://localhost:8000';
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("jwtToken");
+  console.log("token : ", token);
+  return {
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : "",
+  };
+};
 
 export const findAllPost = async () => {
-  const response = await fetch(`${API_URL}/post`);
+  const response = await fetch(`${API_URL}/posts`, {
+    headers: getAuthHeaders(),
+  });
+  console.log("findAllPost response : ", response);
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération des posts");
+  }
   const data = await response.json();
   return data;
 };
 
 export const findOnePostById = async (id: string) => {
-  const response = await fetch(`${API_URL}/post/${id}`);
+  const response = await fetch(`${API_URL}/posts/${id}`, {
+    headers: getAuthHeaders(),
+  });
   const data = await response.json();
   return data;
 };
 
 export const findPostByUserId = async (id: string) => {
-  const response = await fetch(`${API_URL}/post/user/${id}`);
+  const response = await fetch(`${API_URL}/posts/user/${id}`, {
+    headers: getAuthHeaders(),
+  });
   const data = await response.json();
   console.log("findPostByUserId data : ", data);
   return data;
-}
+};
 
 export const createPost = async (credentials: PostType) => {
-  const response = await fetch(`${API_URL}/post`, {
+  const response = await fetch(`${API_URL}/posts`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(credentials),
   });
   const data = await response.json();
@@ -35,11 +51,9 @@ export const createPost = async (credentials: PostType) => {
 };
 
 export const updatePost = async (id: string, credentials: PostType) => {
-  const response = await fetch(`${API_URL}/post/${id}`, {
+  const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(credentials),
   });
   const data = await response.json();
@@ -47,10 +61,9 @@ export const updatePost = async (id: string, credentials: PostType) => {
 };
 
 export const removePost = async (id: string) => {
-  return await fetch(`${API_URL}/post/${id}`, {
+  const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
   });
+  return response;
 };

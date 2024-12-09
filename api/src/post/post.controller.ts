@@ -5,7 +5,6 @@ const PostController = Router();
 
 PostController.get("/", async (req: Request, res: Response): Promise<void> => {
   const posts = await PostService.getAll(req, res);
-  res.send(posts);
 });
 
 PostController.post("/", async (req: Request, res: Response): Promise<void> => {
@@ -50,7 +49,7 @@ PostController.put("/:id", async (req: Request, res: Response): Promise<void> =>
 
 PostController.delete("/:id", async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  
+
   const postCreator = await PostService.getCreatorById(+id);
   if (!postCreator || postCreator !== req.user?.id.toString()) {
     res.status(403).send("Unauthorized to delete this post");

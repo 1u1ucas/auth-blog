@@ -9,11 +9,8 @@ const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("authMiddleware");
   // Récupérer mon token
-  const token = req.headers.authorization;
-
-  console.log(" authMiddleware token : ", token);
+  const token = req.headers.authorization
 
   // Vérifier si le token est valide
   if (!token) {
@@ -23,7 +20,6 @@ const authMiddleware = async (
   // Extract token from header
   const tokenParts = token.split(" ");
   const access_token = tokenParts[1];
-  console.log("access_token: ", access_token);
 
   // Vérifier si le token est valide
   jwt.verify(
@@ -34,7 +30,6 @@ const authMiddleware = async (
         throw new Error("Invalid token");
       }
 
-      console.log("decoded: ", decoded);
 
       // vérifier si le token a expiré
       if (decoded?.exp < Date.now() / 1000) {
@@ -43,8 +38,6 @@ const authMiddleware = async (
 
       // Vérifier si l'utilisateur existe
       const user = await userService.getOneById(decoded.id);
-
-      console.log("authMiddleware user : ", user);
 
       if (!user) {
         throw new Error("User not found");

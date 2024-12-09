@@ -3,10 +3,12 @@ import { useState } from "react";
 import FormInput from "../components/formInput";
 import { UserType } from "../types/user.type";
 import { signin } from "../service/auth.service";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [user, setUser] = useState<Partial<UserType>>({});
   const [message, setMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -17,8 +19,18 @@ function Login() {
     try {
       const data = await signin(user as UserType);
       console.log(data);
+
+      if (data.access_token) {
+        // Stocker le token dans le localStorage
+        localStorage.setItem("jwtToken", data.access_token);
+        setMessage("Connexion réussie !");
+      } else {
+        setMessage("Erreur lors de la connexion.");
+      }
+
       setUser({}); // Réinitialiser les champs du formulaire
       setMessage("Connexion réussie !");
+      navigate("/");
     } catch (error) {
       console.error("Erreur lors de la connexion de l'utilisateur", error);
       setMessage("Erreur lors de la connexion.");
