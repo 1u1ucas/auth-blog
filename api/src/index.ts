@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 app.use("/auth", AuthController);
 app.use("/users", authMiddleware, UserController);
 
-app.use("/posts", authMiddleware, PostController);
+app.use("/posts", PostController);
 
 app.get("/private", authMiddleware, (req, res) => {
   console.log("Get user with authMiddleware: ", req.user);

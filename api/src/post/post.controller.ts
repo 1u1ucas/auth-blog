@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import PostService from "./post.service";
+import authMiddleware from "../middleware/auth.middleware";
 
 const PostController = Router();
 
@@ -7,7 +8,7 @@ PostController.get("/", async (req: Request, res: Response): Promise<void> => {
   const posts = await PostService.getAll(req, res);
 });
 
-PostController.post("/", async (req: Request, res: Response): Promise<void> => {
+PostController.post("/", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { user_id, title, content, image_path } = req.body;
   const postDTO = { user_id, title, content, image_path };
   const post = await PostService.create(postDTO);
@@ -25,7 +26,7 @@ PostController.get("/:id", async (req: Request, res: Response): Promise<void> =>
   res.send(post);
 });
 
-PostController.put("/:id", async (req: Request, res: Response): Promise<void> => {
+PostController.put("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { user_id, title, content, image_path } = req.body;
 
@@ -47,7 +48,7 @@ PostController.put("/:id", async (req: Request, res: Response): Promise<void> =>
   res.send("Post updated successfully");
 });
 
-PostController.delete("/:id", async (req: Request, res: Response): Promise<void> => {
+PostController.delete("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
   const postCreator = await PostService.getCreatorById(+id);

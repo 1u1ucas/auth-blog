@@ -34,6 +34,7 @@ function PostDetail() {
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold">{post.title}</h1>
         <p className="mt-4 text-gray-600">{post.content}</p>
+        <img src={post.image_path} alt="" />
         <p className="mt-4 text-sm text-gray-500">
           Posté le {new Date(post.created_at).toLocaleDateString()}
         </p>
