@@ -3,13 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 function Header() {
   const navigate = useNavigate();
 
-  // Vérifier si un token JWT est stocké dans le localStorage
   const isLoggedIn = !!localStorage.getItem("jwtToken");
 
-  // Gérer la déconnexion
   const handleLogout = () => {
-    localStorage.removeItem("jwtToken"); // Supprimer le token du localStorage
-    navigate("/login"); // Rediriger vers la page de connexion
+    localStorage.removeItem("jwtToken");
+    navigate("/login");
   };
 
   return (

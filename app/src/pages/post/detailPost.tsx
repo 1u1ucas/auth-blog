@@ -13,7 +13,7 @@ function PostDetail() {
   const [editingPost, setEditingPost] = useState<any>({});
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [messageType, setMessageType] = useState<string>(""); // Ajouté pour la couleur du message
+  const [messageType, setMessageType] = useState<string>("");
   const [userId, setUserId] = useState<number>(0);
   const token = localStorage.getItem("jwtToken");
   const navigate = useNavigate();
@@ -22,12 +22,12 @@ function PostDetail() {
     const fetchPost = async () => {
       try {
         const data = await findOnePostById(id as string);
-        setPost(data.post); // Assurez-vous que l'API renvoie un objet avec `post`
-        setEditingPost(data.post); // Même logique pour l'édition
+        setPost(data.post);
+        setEditingPost(data.post);
       } catch (error) {
         console.error("Erreur lors du chargement du post", error);
         setMessage("Erreur lors du chargement du post.");
-        setMessageType("error"); // Message d'erreur
+        setMessageType("error");
       }
     };
 
@@ -47,7 +47,7 @@ function PostDetail() {
     try {
       if (post.user_id !== userId) {
         setMessage("Vous n'êtes pas autorisé à supprimer ce post.");
-        setMessageType("error"); // Message d'erreur
+        setMessageType("error");
         return;
       }
       await removePost(id as string);
@@ -55,7 +55,7 @@ function PostDetail() {
     } catch (error) {
       console.error("Erreur lors de la suppression du post", error);
       setMessage("Erreur lors de la suppression du post.");
-      setMessageType("error"); // Message d'erreur
+      setMessageType("error");
     }
   };
 
@@ -73,7 +73,7 @@ function PostDetail() {
     try {
       if (post.user_id !== userId) {
         setMessage("Vous n'êtes pas autorisé à modifier ce post.");
-        setMessageType("error"); // Message d'erreur
+        setMessageType("error");
         return;
       }
       const updated = await updatePost(id as string, editingPost);
@@ -85,11 +85,10 @@ function PostDetail() {
     } catch (error) {
       console.error("Erreur lors de la modification du post", error);
       setMessage("Erreur lors de la modification du post.");
-      setMessageType("error"); // Message d'erreur
+      setMessageType("error");
     }
   };
 
-  // Déterminer la classe CSS pour le message en fonction de son type (succès ou erreur)
   const messageClass =
     messageType === "error" ? "text-red-500" : "text-green-500";
 

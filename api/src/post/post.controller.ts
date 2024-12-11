@@ -4,17 +4,14 @@ import authMiddleware from "../middleware/auth.middleware";
 
 const PostController = Router();
 
-// Fonction utilitaire pour ajouter un nouveau token à la réponse
 const sendWithNewToken = (res: Response, data: object) => {
-  // Vérifier si un nouveau token est dans les en-têtes
   const newToken = res.getHeader("Authorization")?.toString().split(" ")[1];
 
-  // Retourner la réponse avec le token (si disponible)
   if (newToken) {
     res.status(200).json({
       success: true,
       ...data,
-      token: newToken, // Inclure le token dans la réponse
+      token: newToken,
     });
   } else {
     res.status(200).json({
@@ -24,7 +21,6 @@ const sendWithNewToken = (res: Response, data: object) => {
   }
 };
 
-// Récupérer tous les posts
 PostController.get("/", async (_req: Request, res: Response): Promise<void> => {
   try {
     const posts = await PostService.getAll();
@@ -35,7 +31,6 @@ PostController.get("/", async (_req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Créer un post
 PostController.post("/", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { user_id, title, content, image_path } = req.body;
   const postDTO = { user_id, title, content, image_path };
@@ -53,7 +48,6 @@ PostController.post("/", authMiddleware, async (req: Request, res: Response): Pr
   }
 });
 
-// Récupérer un post par ID
 PostController.get("/:id", async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
@@ -70,7 +64,6 @@ PostController.get("/:id", async (req: Request, res: Response): Promise<void> =>
   }
 });
 
-// Mettre à jour un post
 PostController.put("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { title, content, image_path } = req.body;
@@ -98,7 +91,6 @@ PostController.put("/:id", authMiddleware, async (req: Request, res: Response): 
   }
 });
 
-// Supprimer un post
 PostController.delete("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 

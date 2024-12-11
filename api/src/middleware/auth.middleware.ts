@@ -44,7 +44,7 @@ const authMiddleware = async (
          const newExpirationTime = Math.floor(Date.now() / 1000) + 2 * 60 * 60;
 
         const newToken = jwt.sign(
-          { id: user.id },
+          { id: user.id, email: user.email },
           process.env.JWT_SECRET as string,
           { expiresIn: "2h" }
         );

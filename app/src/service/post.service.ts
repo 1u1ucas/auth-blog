@@ -2,7 +2,6 @@ import { PostType } from "../types/post.type";
 
 const API_URL = "http://localhost:8000";
 
-// Fonction pour obtenir les headers d'authentification
 const getAuthHeaders = () => {
   const token = localStorage.getItem("jwtToken");
   if (!token) {
@@ -14,18 +13,17 @@ const getAuthHeaders = () => {
   };
 };
 
-// Fonction pour gérer la réponse API
 const handleResponse = async (response: Response) => {
   console.log("Réponse du serveur :", response);
   const responseText = await response.text();
+
   try {
     const responseData = JSON.parse(responseText);
+    console.log("Données de la réponse :", responseData);
 
-    // Vérifiez si un nouveau token est présent dans les en-têtes de la réponse
-    const newToken = response.headers.get("Authorization");
+    const newToken = responseData.token;
     if (newToken) {
-      // Si un nouveau token est présent, le stocker dans le localStorage
-      const token = newToken.split(" ")[1]; // Récupérer le token après "Bearer "
+      const token = newToken;
       localStorage.setItem("jwtToken", token);
       console.log("Nouveau token enregistré :", token);
     }
@@ -33,14 +31,13 @@ const handleResponse = async (response: Response) => {
     if (!response.ok) {
       throw new Error(responseData.message || "Une erreur est survenue.");
     }
-    return responseData; // Renvoie la réponse sous forme d'objet
+    return responseData;
   } catch (error) {
     console.error("Réponse du serveur (non-JSON) :", responseText);
     throw new Error(responseText || "Une erreur inattendue est survenue.");
   }
 };
 
-// Fonction pour récupérer tous les posts
 export const findAllPost = async () => {
   const response = await fetch(`${API_URL}/posts`, {
     headers: getAuthHeaders(),
@@ -48,7 +45,6 @@ export const findAllPost = async () => {
   return handleResponse(response);
 };
 
-// Fonction pour récupérer un post par ID
 export const findOnePostById = async (id: string) => {
   const response = await fetch(`${API_URL}/posts/${id}`, {
     headers: getAuthHeaders(),
@@ -56,7 +52,6 @@ export const findOnePostById = async (id: string) => {
   return handleResponse(response);
 };
 
-// Fonction pour récupérer les posts par ID d'utilisateur
 export const findPostByUserId = async (id: string) => {
   const response = await fetch(`${API_URL}/posts/user/${id}`, {
     headers: getAuthHeaders(),
@@ -64,7 +59,6 @@ export const findPostByUserId = async (id: string) => {
   return handleResponse(response);
 };
 
-// Fonction pour créer un post
 export const createPost = async (credentials: PostType) => {
   const response = await fetch(`${API_URL}/posts`, {
     method: "POST",
@@ -74,7 +68,6 @@ export const createPost = async (credentials: PostType) => {
   return handleResponse(response);
 };
 
-// Fonction pour mettre à jour un post
 export const updatePost = async (id: string, credentials: PostType) => {
   const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "PUT",
@@ -84,7 +77,6 @@ export const updatePost = async (id: string, credentials: PostType) => {
   return handleResponse(response);
 };
 
-// Fonction pour supprimer un post
 export const removePost = async (id: string) => {
   const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "DELETE",

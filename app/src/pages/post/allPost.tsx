@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { PostType } from "../../types/post.type";
 import { findAllPost } from "../../service/post.service";
-import { useNavigate } from "react-router-dom"; // Si vous utilisez react-router
+import { useNavigate } from "react-router-dom";
 
 function PostsPage() {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const navigate = useNavigate(); // Si vous utilisez react-router
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const data = await findAllPost();
-        setPosts(data.posts); // On s'assure de bien récupérer la liste des posts
+        setPosts(data.posts);
       } catch (error) {
         console.error("Erreur lors du chargement des posts", error);
         setMessage("Erreur lors du chargement des posts.");
@@ -26,7 +26,7 @@ function PostsPage() {
   }, []);
 
   const handlePostClick = (postId: number) => {
-    navigate(`/posts/${postId}`); // Utilisation de react-router pour la navigation
+    navigate(`/posts/${postId}`);
   };
 
   return (
