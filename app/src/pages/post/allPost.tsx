@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
 import { PostType } from "../../types/post.type";
 import { findAllPost } from "../../service/post.service";
+import { useNavigate } from "react-router-dom"; // Si vous utilisez react-router
 
 function PostsPage() {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate(); // Si vous utilisez react-router
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const data = await findAllPost();
-        setPosts(data);
+        setPosts(data.posts); // On s'assure de bien récupérer la liste des posts
       } catch (error) {
         console.error("Erreur lors du chargement des posts", error);
         setMessage("Erreur lors du chargement des posts.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -21,16 +26,27 @@ function PostsPage() {
   }, []);
 
   const handlePostClick = (postId: number) => {
-    window.location.href = `/posts/${postId}`;
+    navigate(`/posts/${postId}`); // Utilisation de react-router pour la navigation
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h2 className="text-3xl font-bold text-center mb-6">Tous les Posts</h2>
-      {message && <p className="text-center text-red-500">{message}</p>}
+
+      {isLoading && (
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Chargement...</span>
+          </div>
+        </div>
+      )}
+
+      {message && !isLoading && (
+        <p className="text-center text-red-500">{message}</p>
+      )}
 
       <div className="space-y-4">
-        {posts.length === 0 ? (
+        {posts.length === 0 && !isLoading ? (
           <p className="text-center text-gray-500">
             Aucun post disponible pour le moment.
           </p>

@@ -4,67 +4,122 @@ import authMiddleware from "../middleware/auth.middleware";
 
 const PostController = Router();
 
-PostController.get("/", async (req: Request, res: Response): Promise<void> => {
-  const posts = await PostService.getAll(req, res);
+// Fonction utilitaire pour ajouter un nouveau token à la réponse
+const sendWithNewToken = (res: Response, data: object) => {
+  // Vérifier si un nouveau token est dans les en-têtes
+  const newToken = res.getHeader("Authorization")?.toString().split(" ")[1];
+
+  // Retourner la réponse avec le token (si disponible)
+  if (newToken) {
+    res.status(200).json({
+      success: true,
+      ...data,
+      token: newToken, // Inclure le token dans la réponse
+    });
+  } else {
+    res.status(200).json({
+      success: true,
+      ...data,
+    });
+  }
+};
+
+// Récupérer tous les posts
+PostController.get("/", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const posts = await PostService.getAll();
+    sendWithNewToken(res, { posts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error fetching posts" });
+  }
 });
 
+// Créer un post
 PostController.post("/", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { user_id, title, content, image_path } = req.body;
   const postDTO = { user_id, title, content, image_path };
-  const post = await PostService.create(postDTO);
 
-  res.status(201).send(post);
+  try {
+    const created = await PostService.create(postDTO);
+    if (created) {
+      sendWithNewToken(res, { message: "Post created successfully" });
+    } else {
+      res.status(500).json({ success: false, message: "Error creating post" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error instanceof Error ? error.message : "Unknown error" });
+  }
 });
 
+// Récupérer un post par ID
 PostController.get("/:id", async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const post = await PostService.getOneById(+id);
-  if (!post) {
-    res.status(404).send("Post not found");
-    return;
+
+  try {
+    const post = await PostService.getOneById(+id);
+    if (!post) {
+      res.status(404).json({ success: false, message: "Post not found" });
+      return;
+    }
+    sendWithNewToken(res, { post });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error fetching post" });
   }
-  res.send(post);
 });
 
+// Mettre à jour un post
 PostController.put("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { user_id, title, content, image_path } = req.body;
+  const { title, content, image_path } = req.body;
 
-  // Vérifiez que l'utilisateur connecté est l'auteur
-  const postCreator = await PostService.getCreatorById(+id);
-  if (!postCreator || postCreator !== req.user?.id.toString()) {
-    res.status(403).send("Unauthorized to update this post");
-    return;
+  try {
+    const postCreator = await PostService.getCreatorById(+id);
+
+    if (!postCreator || postCreator !== req.user?.id) {
+      res.status(403).json({ success: false, message: "Unauthorized to update this post" });
+      return;
+    }
+
+    const postDTO = { title, content, image_path, user_id: req.user.id };
+    const updated = await PostService.update(+id, postDTO);
+
+    if (!updated) {
+      res.status(404).json({ success: false, message: "Post not found" });
+      return;
+    }
+
+    sendWithNewToken(res, { post: updated });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error updating post" });
   }
-
-  const postDTO = { user_id, title, content, image_path };
-  const updated = await PostService.update(+id, postDTO);
-
-  if (!updated) {
-    res.status(404).send("Post not found");
-    return;
-  }
-
-  res.send("Post updated successfully");
 });
 
+// Supprimer un post
 PostController.delete("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
-  const postCreator = await PostService.getCreatorById(+id);
-  if (!postCreator || postCreator !== req.user?.id.toString()) {
-    res.status(403).send("Unauthorized to delete this post");
-    return;
+  try {
+    const postCreator = await PostService.getCreatorById(+id);
+    if (!postCreator || postCreator !== req.user?.id) {
+      res.status(403).json({ success: false, message: "Unauthorized to delete this post" });
+      return;
+    }
+
+    const deleted = await PostService.remove(+id);
+    if (!deleted) {
+      res.status(404).json({ success: false, message: "Post not found" });
+      return;
+    }
+
+    sendWithNewToken(res, { message: "Post deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error deleting post" });
   }
-
-  const deleted = await PostService.remove(+id);
-
-  if (!deleted) {
-    res.status(404).send("Post not found");
-    return;
-  }
-
-  res.send("Post deleted successfully");
 });
 
 export default PostController;

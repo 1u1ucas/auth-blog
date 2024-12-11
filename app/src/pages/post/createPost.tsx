@@ -5,6 +5,7 @@ import { createPost } from "../../service/post.service";
 function CreatePost() {
   const [post, setPost] = useState<Partial<PostType>>({});
   const [message, setMessage] = useState<string>("");
+
   const token = localStorage.getItem("jwtToken");
 
   useEffect(() => {
@@ -36,9 +37,7 @@ function CreatePost() {
     }
 
     try {
-      console.log("post : ", post);
-      const data = await createPost(post as PostType);
-      console.log(data);
+      await createPost(post as PostType);
       setPost({});
       setMessage("Post créé avec succès !");
     } catch (error) {
@@ -97,7 +96,7 @@ function CreatePost() {
               htmlFor="image_path"
               className="block text-sm font-medium text-gray-700"
             >
-              lien vers l'image
+              Lien vers l'image
             </label>
             <textarea
               name="image_path"
