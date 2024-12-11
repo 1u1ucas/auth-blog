@@ -1,105 +1,94 @@
-import { Request, Response } from "express";
-import connection from "../../config/database.config";
+import pool from "../../config/database.config";
+import { IPost, IPostDTO } from "./post.types";
 
-const getAll = async (req: Request, res: Response) => {
-  connection.query("SELECT * FROM posts", (err, results) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Error retrieving posts from database");
-    } else {
-      res.send(results.rows);
-    }
-  });
+const getAll = async () => {
+  const query = "SELECT * FROM public.post";
+
+  try {
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw new Error("Error fetching posts");
+  }
 };
 
-const getOneById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  connection.query(
-    "SELECT * FROM posts WHERE id = ?",
-    [id],
-    (err, results) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error retrieving post from database");
-      } else {
-        res.send(results.rows);
-      }
-    }
-  );
-}
+const getOneById = async (id: number): Promise<IPost | null> => {
+  const query = "SELECT * FROM public.post WHERE id = $1";
+  const values = [id];
 
-const getByUserId = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  connection.query(
-    "SELECT * FROM posts WHERE user_id = ?",
-    [userId],
-    (err, results) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error retrieving posts from database");
-      } else {
-        res.send(results.rows);
-      }
-    }
-  );
-}
+  try {
+    const result = await pool.query(query, values);
+    return result.rows[0] || null;
+  } catch (error) {
+    console.error("Error fetching post by ID:", error);
+    throw new Error("Error fetching post by ID");
+  }
+};
 
-const create = async (req: Request, res: Response) => {
-  const { title, content, user_id, created_at, image_path } = req.body;
-  connection.query(
-    "INSERT INTO posts (title, content, user_id, created_at, image_path) VALUES (?, ?, ?, ?, ?)",
-    [title, content, user_id, created_at, image_path],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error saving post in database");
-      } else {
-        const postId = result.rows[0].id;
-        res.send({ id: postId, title, content, user_id, created_at, image_path });
-      }
-    }
-  );
-  
-}
+const getCreatorById = async (id: number): Promise<Number | null> => {
+  const query = "SELECT user_id FROM public.post WHERE id = $1";
+  const values = [id];
 
-const update = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { title, content, user_id, created_at, image_path } = req.body;
-  connection.query(
-    "UPDATE posts SET title = ?, content = ?, user_id = ?, created_at = ?, image_path = ? WHERE id = ?",
-    [title, content, user_id, created_at, image_path, id],
-    (err) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error updating post in database");
-      } else {
-        res.send({ id, title, content, user_id, created_at, image_path });
-      }
-    }
-  );
-}
+  try {
+    const result = await pool.query(query, values);
+    return result.rows[0]?.user_id || null;
+  } catch (error) {
+    console.error("Error fetching post creator:", error);
+    throw new Error("Error fetching post creator");
+  }
+};
 
-const remove = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  connection.query(
-    "DELETE FROM posts WHERE id = ?",
-    [id],
-    (err) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error deleting post from database");
-      } else {
-        res.send("Post deleted successfully");
-      }
-    }
-  );
-}
+const create = async (postDTO: IPostDTO) => {
+  const query = "INSERT INTO public.post (user_id, title, content, image_path) VALUES ($1, $2, $3, $4)";
+  const values = [postDTO.user_id, postDTO.title, postDTO.content, postDTO.image_path];
 
+  try {
+    await pool.query(query, values);
+    return true;
+  } catch (error) {
+    console.error("Error creating post:", error);
+    throw new Error("Error creating post");
+  }
+};
+
+const update = async (id: number, postDTO: IPostDTO): Promise<IPost | false> => {
+  const query = `
+    UPDATE public.post
+    SET title = $1, content = $2, image_path = $3
+    WHERE id = $4 AND user_id = $5 RETURNING *;
+  `;
+  const values = [postDTO.title, postDTO.content, postDTO.image_path, id, postDTO.user_id];
+
+  try {
+    const result = await pool.query(query, values);
+    if (!result.rowCount) return false;
+    return result.rows[0];
+  } catch (error) {
+    console.error(`Error updating post with ID ${id}:`, error);
+    throw new Error(`Error updating post with ID ${id}`);
+  }
+};
+
+
+const remove = async (id: number) => {
+  const query = "DELETE FROM public.post WHERE id = $1";
+  const values = [id];
+
+  try {
+    const result = await pool.query(query, values);
+    if (!result.rowCount) return false;
+    return result.rowCount > 0;
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw new Error("Error deleting post");
+  }
+};
 
 export default {
   getAll,
   getOneById,
-  getByUserId,
+  getCreatorById,
   create,
   update,
   remove,

@@ -1,89 +1,97 @@
 import { Request, Response } from "express";
 import pool from "../../config/database.config";
-
+import { IUser, IUserDTO } from "./user.types";
 
 const getAll = async (req: Request, res: Response) => {
-  pool.query("SELECT * FROM users", (err, results) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Error retrieving users from database");
-    } else {
-      res.send(results.rows);
-    }
-  });
+  const query = "SELECT * FROM public.user";
+
+  try {
+    const result = await pool.query(query);
+    const users = result.rows;
+
+    res.send(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).send("Error fetching users");
+  }
+}
+
+const getOneByEmail = async (email: string): Promise<IUser | null> => {
+  const query = "SELECT * FROM public.user WHERE email = $1";
+  const values = [email];
+
+  const result = await pool.query(query, values);
+  const user = result.rows[0];
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
 };
 
-const getOneById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  pool.query(
-    "SELECT * FROM users WHERE id = $1",
-    [id],
-    (err, results) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error retrieving user from database");
-      } else {
-        res.send(results.rows);
-      }
-    }
-  );
+const getOneById = async (id: number): Promise<IUser | null> => {
+  const query = "SELECT * FROM public.user WHERE id = $1";
+  const values = [id];
+
+  try {
+    const result = await pool.query(query, values);
+    const user = result.rows[0];
+
+    return user;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return null;
+  }
+};
+
+const create = async (userDTO: IUserDTO) => {
+  const query = "INSERT INTO public.user (username, email, password) VALUES ($1, $2, $3)";
+  const values = [userDTO.username, userDTO.email, userDTO.password];
+
+  try {
+    await pool.query(query, values);
+
+    return true;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return false;
+  }
+};
+
+const update = async (id: number, userDTO: IUserDTO) => {
+  const query = "UPDATE public.user SET username = $1, email = $2, password = $3 WHERE id = $4";
+  const values = [userDTO.username, userDTO.email, userDTO.password, id];
+
+  try {
+    await pool.query(query, values);
+
+    return true;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return false;
+  }
 }
 
-const create = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
-  pool.query(
-    "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id",
-    [username, email, password],
-    (err, result) => {
-      if (err) {
-        console.log("err", err);
-        res.status(500).send("Error saving user in database");
-      } else {
-        const userId = result.rows[0].id;
-        res.send({id: userId});
-  
-    }
-  });
-}
+const remove = async (id: number) => {
+  const query = "DELETE FROM public.user WHERE id = $1";
+  const values = [id];
 
-const update = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { username, email, password } = req.body;
-  pool.query(
-    "UPDATE users SET username = $1, email = $2, password = $3 WHERE id = $5",
-    [username, email, password, id],
-    (err) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error updating user in database");
-      } else {
-        res.send({ id, username, email });
-      }
-    }
-  );
-}
+  try {
+    await pool.query(query, values);
 
-const remove = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  pool.query(
-    "DELETE FROM users WHERE id = $1",
-    [id],
-    (err) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send("Error deleting user from database");
-      } else {
-        res.send("User deleted successfully");
-      }
-    }
-  );
-}
-
+    return true;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return false;
+  }
+} 
 
 export default {
   getAll,
   getOneById,
   create,
   update,
-  remove
+  remove,
+  getOneByEmail,
 };

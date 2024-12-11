@@ -1,56 +1,86 @@
 import { PostType } from "../types/post.type";
 
+const API_URL = "http://localhost:8000";
 
-const API_URL = 'http://localhost:8000';
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    console.warn("Aucun token JWT trouvé dans le localStorage.");
+  }
+  return {
+    "Content-Type": "application/json",
+    Authorization: token ? `Bearer ${token}` : "",
+  };
+};
+
+const handleResponse = async (response: Response) => {
+  console.log("Réponse du serveur :", response);
+  const responseText = await response.text();
+
+  try {
+    const responseData = JSON.parse(responseText);
+    console.log("Données de la réponse :", responseData);
+
+    const newToken = responseData.token;
+    if (newToken) {
+      const token = newToken;
+      localStorage.setItem("jwtToken", token);
+      console.log("Nouveau token enregistré :", token);
+    }
+
+    if (!response.ok) {
+      throw new Error(responseData.message || "Une erreur est survenue.");
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Réponse du serveur (non-JSON) :", responseText);
+    throw new Error(responseText || "Une erreur inattendue est survenue.");
+  }
+};
 
 export const findAllPost = async () => {
-  const response = await fetch(`${API_URL}/post`);
-  const data = await response.json();
-  return data;
+  const response = await fetch(`${API_URL}/posts`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
 };
 
 export const findOnePostById = async (id: string) => {
-  const response = await fetch(`${API_URL}/post/${id}`);
-  const data = await response.json();
-  return data;
+  const response = await fetch(`${API_URL}/posts/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
 };
 
 export const findPostByUserId = async (id: string) => {
-  const response = await fetch(`${API_URL}/post/user/${id}`);
-  const data = await response.json();
-  console.log("findPostByUserId data : ", data);
-  return data;
-}
+  const response = await fetch(`${API_URL}/posts/user/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
+};
 
 export const createPost = async (credentials: PostType) => {
-  const response = await fetch(`${API_URL}/post`, {
+  const response = await fetch(`${API_URL}/posts`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(credentials),
   });
-  const data = await response.json();
-  return data;
+  return handleResponse(response);
 };
 
 export const updatePost = async (id: string, credentials: PostType) => {
-  const response = await fetch(`${API_URL}/post/${id}`, {
+  const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(credentials),
   });
-  const data = await response.json();
-  return data;
+  return handleResponse(response);
 };
 
 export const removePost = async (id: string) => {
-  return await fetch(`${API_URL}/post/${id}`, {
+  const response = await fetch(`${API_URL}/posts/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
   });
+  return handleResponse(response);
 };
