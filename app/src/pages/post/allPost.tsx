@@ -13,6 +13,7 @@ function PostsPage() {
     const fetchPosts = async () => {
       try {
         const data = await findAllPost();
+        console.log(data);
         setPosts(data.posts);
       } catch (error) {
         console.error("Erreur lors du chargement des posts", error);

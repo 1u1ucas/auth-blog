@@ -7,6 +7,7 @@ import CreatePost from "./pages/post/createPost";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import SignUp from "./pages/signUp";
+import Account from "./pages/account";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/posts" element={<PostsPage />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/createPost" element={<CreatePost />} />
+        <Route path="/account" element={<Account />} />
       </Routes>
     </Router>
   );

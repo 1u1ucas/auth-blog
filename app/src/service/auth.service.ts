@@ -46,6 +46,27 @@ export const signup = async (credentials: UserType) => {
   }
 };
 
+export const getUserAccount = async () => {
+  try {
+    const response = await fetch(`${API_URL}/auth/account`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du compte", error);
+    throw error;
+  }
+};
+
 export default {
   signin,
   signup,

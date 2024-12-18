@@ -28,4 +28,20 @@ AuthController.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
+AuthController.get("/account", async (req: Request, res: Response) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    res.status(401).send("Token not found");
+    return;
+  }
+
+  const user = await AuthService.getUserAccount(token);
+
+  if (user) {
+    res.status(200).send(user);
+  } else {
+    res.status(401).send("User not found");
+  }
+});
+
 export default AuthController;

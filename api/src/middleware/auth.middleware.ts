@@ -25,13 +25,14 @@ const authMiddleware = async (
       access_token,
       process.env.JWT_SECRET as string,
       async (err, decoded: any) => {
-        if (err) {
-          res.status(401).send("Invalid token");
-          return;
-        }
 
         if (!decoded?.exp || decoded.exp < Date.now() / 1000) {
           res.status(401).send("Token expired");
+          return;
+        }
+
+        if (err) {
+          res.status(401).send("Invalid token");
           return;
         }
 

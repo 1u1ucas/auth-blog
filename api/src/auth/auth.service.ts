@@ -32,7 +32,17 @@ const signup = async (userDTO: IUserDTO) => {
   return userService.create(userDTO);
 };
 
+const getUserAccount = async (token: string) => {
+  const tokenParts = token.split(" ");
+  const access_token = tokenParts[1];
+
+  const decoded: any = jwt.verify(access_token, JWT_SECRET);
+
+  return userService.getOneById(decoded.id);
+}
+
 export default {
   signin,
   signup,
+  getUserAccount,
 };
