@@ -2,6 +2,8 @@ import userService from "../user/user.service";
 import { IUserDTO } from "../user/user.types";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -13,7 +15,8 @@ const signin = async (userDTO: IUserDTO) => {
     return null;
   }
 
-  if (user.password !== userDTO.password) {
+  const passwordMatch = await bcrypt.compare(userDTO.password, user.password);
+  if (!passwordMatch) {
     return null;
   }
 
@@ -29,7 +32,11 @@ const signin = async (userDTO: IUserDTO) => {
 };
 
 const signup = async (userDTO: IUserDTO) => {
-  return userService.create(userDTO);
+  const hashedPassword = await bcrypt.hash(userDTO.password, 10);
+
+  const userWithHashedPassword = { ...userDTO, password: hashedPassword };
+
+  return userService.create(userWithHashedPassword);
 };
 
 const getUserAccount = async (token: string) => {
@@ -39,7 +46,7 @@ const getUserAccount = async (token: string) => {
   const decoded: any = jwt.verify(access_token, JWT_SECRET);
 
   return userService.getOneById(decoded.id);
-}
+};
 
 export default {
   signin,
