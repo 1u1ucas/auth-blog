@@ -36,4 +36,4 @@
 - up containers
 - create database and Tables
 - install dependencies postgres
-- connecg db
+- connect db
