@@ -14,18 +14,15 @@ const getAuthHeaders = () => {
 };
 
 const handleResponse = async (response: Response) => {
-  console.log("Réponse du serveur :", response);
   const responseText = await response.text();
 
   try {
     const responseData = JSON.parse(responseText);
-    console.log("Données de la réponse :", responseData);
 
     const newToken = responseData.token;
     if (newToken) {
       const token = newToken;
       localStorage.setItem("jwtToken", token);
-      console.log("Nouveau token enregistré :", token);
     }
 
     if (!response.ok) {
@@ -52,7 +49,7 @@ export const findOnePostById = async (id: string) => {
   return handleResponse(response);
 };
 
-export const findPostByUserId = async (id: string) => {
+export const findPostByUserId = async (id: number) => {
   const response = await fetch(`${API_URL}/posts/user/${id}`, {
     headers: getAuthHeaders(),
   });

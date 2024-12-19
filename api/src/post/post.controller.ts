@@ -64,6 +64,18 @@ PostController.get("/:id", async (req: Request, res: Response): Promise<void> =>
   }
 });
 
+PostController.get("/user/:id", async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const posts = await PostService.getByUserId(+id);
+    sendWithNewToken(res, { posts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error fetching posts" });
+  }
+});
+
 PostController.put("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { title, content, image_path } = req.body;

@@ -51,7 +51,6 @@ const authMiddleware = async (
         );
 
         res.setHeader("Authorization", `Bearer ${newToken}`);
-console.log("newToken", res);
         (req as any).user = user;
 
 

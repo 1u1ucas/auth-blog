@@ -16,7 +16,6 @@ function SignUp() {
     e.preventDefault();
     try {
       const data = await signup(user as UserType);
-      console.log(data);
       setUser({});
       setMessage("Utilisateur créé avec succès !");
     } catch (error) {

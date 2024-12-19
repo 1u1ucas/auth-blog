@@ -26,6 +26,19 @@ const getOneById = async (id: number): Promise<IPost | null> => {
   }
 };
 
+const getByUserId = async (id: number): Promise<IPost[] | null> => {
+  const query = "SELECT * FROM public.post WHERE user_id = $1";
+  const values = [id];
+
+  try {
+    const result = await pool.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching posts by user ID:", error);
+    throw new Error("Error fetching posts by user ID");
+  }
+}
+
 const getCreatorById = async (id: number): Promise<Number | null> => {
   const query = "SELECT user_id FROM public.post WHERE id = $1";
   const values = [id];
@@ -88,6 +101,7 @@ const remove = async (id: number) => {
 export default {
   getAll,
   getOneById,
+  getByUserId,
   getCreatorById,
   create,
   update,

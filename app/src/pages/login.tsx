@@ -18,7 +18,6 @@ function Login() {
     e.preventDefault();
     try {
       const data = await signin(user as UserType);
-      console.log(data);
 
       if (data.access_token) {
         // Stocker le token dans le localStorage

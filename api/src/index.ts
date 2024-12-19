@@ -33,10 +33,8 @@ app.use("/users", authMiddleware, UserController);
 app.use("/posts", PostController);
 
 app.get("/private", authMiddleware, (req, res) => {
-  console.log("Get user with authMiddleware: ", req.user);
   res.send("Private route");
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
 });
