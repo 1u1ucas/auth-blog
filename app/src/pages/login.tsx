@@ -29,7 +29,7 @@ function Login() {
 
       setUser({}); // Réinitialiser les champs du formulaire
       setMessage("Connexion réussie !");
-      navigate("/");
+      navigate("/posts");
     } catch (error) {
       console.error("Erreur lors de la connexion de l'utilisateur", error);
       setMessage("Erreur lors de la connexion.");

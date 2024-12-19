@@ -3,10 +3,12 @@ import { useState } from "react";
 import FormInput from "../components/formInput";
 import { UserType } from "../types/user.type";
 import { signup } from "../service/auth.service";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const [user, setUser] = useState<Partial<UserType>>({});
   const [message, setMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -16,8 +18,9 @@ function SignUp() {
     e.preventDefault();
     try {
       const data = await signup(user as UserType);
-      setUser({});
+      setUser(data);
       setMessage("Utilisateur créé avec succès !");
+      navigate("/login");
     } catch (error) {
       console.error("Erreur lors de l'inscription de l'utilisateur", error);
       setMessage("Erreur lors de la création de l'utilisateur.");
